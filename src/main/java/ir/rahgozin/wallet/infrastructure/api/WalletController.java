@@ -9,31 +9,32 @@ import ir.rahgozin.wallet.application.wallet.query.TransactionQuery;
 import ir.rahgozin.wallet.infrastructure.api.resources.CreateAccountRequest;
 import ir.rahgozin.wallet.infrastructure.api.resources.CreditAccountRequest;
 import ir.rahgozin.wallet.infrastructure.api.resources.DebitAccountRequest;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Log4j2
 @RestController
-@RequestMapping(value = "/wallet")
+@RequiredArgsConstructor
 public class WalletController {
     private final static Map<String, Integer> requestCounter = new HashMap<>();
     private final int limitation = 5;
 
-    @Autowired
-    private WalletService walletService;
-    @Autowired
-    private ConversionService conversionService;
-
+    private final WalletService walletService;
+    private final ConversionService conversionService;
 
     @PostMapping(path = "/create")
-    public ResponseEntity<?> createAccount(@RequestBody CreateAccountRequest request) {
+    public ResponseEntity<?> createAccount(@RequestBody @Valid CreateAccountRequest request) {
 
         CreateAccountCommand createAccountCommand = conversionService.convert(request, CreateAccountCommand.class);
 

@@ -2,6 +2,7 @@ package ir.rahgozin.wallet.application.wallet;
 
 import ir.rahgozin.wallet.application.common.NotificationService;
 import ir.rahgozin.wallet.application.customer.Customer;
+import ir.rahgozin.wallet.application.customer.CustomerService;
 import ir.rahgozin.wallet.application.wallet.Account.AccountType;
 import ir.rahgozin.wallet.application.wallet.command.CreateAccountCommand;
 import ir.rahgozin.wallet.application.wallet.command.CreditAccountCommand;
@@ -27,22 +28,31 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class WalletService {
-    private AccountRepository accountRepository;
-    private NotificationService notificationService;
+    private final AccountRepository accountRepository;
+    private final NotificationService notificationService;
+    private final CustomerService customerService;
 
+    @Transactional
     public String createAccount(CreateAccountCommand command) {
+        Customer customer = createOrFindCustomer(command);
         Account account = new Account();
+        account.setOwner(customer);
+        account.setType(AccountType.valueOf(command.getType()));
+        accountRepository.save(account);
+        return account.getNumber();
+    }
+
+    private Customer createOrFindCustomer(CreateAccountCommand command) {
+        boolean isExist = customerService.existsByNationalCode(command.getNationalCode());
+        if (isExist) {
+            return customerService.findByNationalCode(command.getNationalCode());
+        }
         Customer customer = new Customer();
         customer.setMobile(command.getMobile());
         customer.setFirstName(command.getFirstName());
         customer.setLastName(command.getLastName());
         customer.setNationalCode(command.getNationalCode());
-        account.setOwner(customer);
-        account.setTransactions(Set.of());
-        account.setType(AccountType.valueOf(command.getType()));
-        account.setNumber(UUID.randomUUID().toString());
-        accountRepository.save(account);
-        return account.getNumber();
+        return customerService.create(customer);
     }
 
     @Transactional

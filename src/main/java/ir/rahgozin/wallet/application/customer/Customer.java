@@ -4,14 +4,24 @@ import ir.rahgozin.wallet.application.common.AbstractEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Data
 @Entity
-@Table
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_customer_national_code",
+                        columnNames = "national_code"
+                ),
+                @UniqueConstraint(
+                        name = "uk_customer_mobile",
+                        columnNames = "mobile"
+                )
+        }
+)
 @NoArgsConstructor
 public class Customer extends AbstractEntity {
     @Column(name = "national_code", nullable = false)
