@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: wallet
+  cache:
+    type: simple
+  datasource:
+    url: jdbc:postgresql://localhost:5432/wallet
+    username: wallet
+    password: wallet
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: true
+    show-sql: true
+    properties:
+      format_sql: true
+      use_sql_comments: true
+      use_minimum_puts: false
+      use_second_level_cache: false
+      use_query_cache: false
+      cache_region_factory: org.hibernate.cache.internal.NoCachingRegionFactory
+    hibernate:
+      ddl-auto: create-drop
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      enable-auto-commit: true
+      auto-offset-reset: latest
+      group-id: wallet_consumer_group_id
+
+server:
+  shutdown: immediate
+  port: 8080
+  servlet:
+    context-path: /wallet/
