@@ -4,10 +4,10 @@ spring:
   cache:
     type: simple
   datasource:
-    url: jdbc:postgresql://localhost:5432/wallet
-    username: wallet
-    password: wallet
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:h2:mem:keefDB
+    username: sa
+    password: password
+    driverClassName: org.h2.Driver
   jpa:
     open-in-view: true
     show-sql: true
@@ -25,7 +25,6 @@ spring:
       host: localhost
       port: 6379
   kafka:
-    bootstrap-servers: localhost:9092
     consumer:
       enable-auto-commit: true
       auto-offset-reset: latest
