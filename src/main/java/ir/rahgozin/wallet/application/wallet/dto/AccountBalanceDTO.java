@@ -1,9 +1,14 @@
 package ir.rahgozin.wallet.application.wallet.dto;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+import java.math.BigDecimal;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class AccountBalanceDTO {
-    private Long number;
-    private Double amount;
+    private String number;
+    private BigDecimal amount;
 }

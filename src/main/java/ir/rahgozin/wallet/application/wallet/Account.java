@@ -4,13 +4,16 @@ import ir.rahgozin.wallet.application.common.AbstractEntity;
 import ir.rahgozin.wallet.application.customer.Customer;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @Table(
         uniqueConstraints = {
                 @UniqueConstraint(

@@ -1,23 +1,34 @@
 package ir.rahgozin.wallet.application.customer.kyc;
 
+import ir.rahgozin.wallet.application.common.exception.BusinessException;
 import ir.rahgozin.wallet.application.customer.Customer;
 import ir.rahgozin.wallet.application.customer.CustomerRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@Service
-public class CustomerVerificationService {
-    private CustomerRepository customerRepository;
+import java.util.Optional;
 
-    public void handleByCustomerId(String customerId, boolean verificationResult) {
-        Customer customer = customerRepository.findById(Long.valueOf(customerId))
-                .orElseThrow(() -> new RuntimeException("customer not found with id " + customerId));
+import static ir.rahgozin.wallet.application.common.exception.BusinessError.CUSTOMER_NOT_FOUND;
+
+@Service
+@RequiredArgsConstructor
+public class CustomerVerificationService {
+
+    private final CustomerRepository customerRepository;
+
+    @Transactional
+    public void handleByCustomerId(Long customerId, boolean verificationResult) {
+        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new BusinessException(CUSTOMER_NOT_FOUND));
         customer.setVerified(verificationResult);
-        customerRepository.save(customer);
     }
 
+    @Transactional
     public void handleByNationalCode(String nationalCode, boolean verificationResult) {
-        Customer customer = customerRepository.findByNationalCode(nationalCode); // what happened if no customer found here?
+        Customer customer = customerRepository.findByNationalCode(nationalCode);
+        if(customer == null){
+            throw new BusinessException(CUSTOMER_NOT_FOUND);
+        }
         customer.setVerified(verificationResult);
-        customerRepository.save(customer);
     }
 }

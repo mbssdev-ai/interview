@@ -1,23 +1,38 @@
 package ir.rahgozin.wallet.application.common;
 
-import ir.rahgozin.wallet.application.common.Message.MessageStatus;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import java.util.concurrent.CompletableFuture;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class NotificationService {
 
-    private final MessageRepository messageRepository;
-    public void send(String number , String message) throws RuntimeException {
-        CompletableFuture.runAsync(() -> {
-            Message messageEntity = new Message();
-            messageEntity.setMessage(message);
-            messageEntity.setNumber(number);
-            messageEntity.setStatus(MessageStatus.PENDING);
-            messageRepository.save(messageEntity);
-        });
+    private final MessageService messageService;
+
+    @Scheduled(fixedDelay = 5000)
+    public void notificationProcess() {
+        List<Message> messages = messageService.claimMessages();
+        List<Message> successSending = new ArrayList<>();
+        List<Message> unsuccessSending = new ArrayList<>();
+        for (Message message : messages) {
+            try {
+                sendSms(message);
+                successSending.add(message);
+            } catch (Exception e) {
+                unsuccessSending.add(message);
+            }
+        }
+        messageService.updateMessageStatus(successSending, unsuccessSending);
     }
+
+
+    private void sendSms(Message message) {
+        // call sending sms api
+    }
+
 }

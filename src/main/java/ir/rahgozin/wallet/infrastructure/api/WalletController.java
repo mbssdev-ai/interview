@@ -13,12 +13,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +40,7 @@ public class WalletController {
     }
 
     @PostMapping(path = "/credit")
-    public ResponseEntity<?> creditAccount(@RequestBody CreditAccountRequest request) {
+    public ResponseEntity<?> creditAccount(@RequestBody @Valid CreditAccountRequest request) {
 
         CreditAccountCommand creditAccountCommand = conversionService.convert(request, CreditAccountCommand.class);
 
@@ -50,37 +48,20 @@ public class WalletController {
     }
 
     @PostMapping(path = "/debit")
-    public ResponseEntity<?> debitAccount(@RequestBody DebitAccountRequest request) {
+    public ResponseEntity<?> debitAccount(@RequestBody @Valid DebitAccountRequest request) {
         DebitAccountCommand debitAccountCommand = conversionService.convert(request, DebitAccountCommand.class);
         return ResponseEntity.ok(walletService.debitAccount(debitAccountCommand));
     }
 
-    @PostMapping(path = "/balance")
+    @GetMapping(path = "/balance")
     public ResponseEntity<?> accountBalance(@RequestParam("customerId") String customerId) {
-
-        if (requestCounter.containsKey(customerId)) {
-            Integer counter = requestCounter.get(customerId);
-            if (counter > limitation) {
-                return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
-            }
-            requestCounter.replace(customerId, counter + 1);
-        } else {
-            requestCounter.put(customerId, 1);
-        }
-
-        if (customerId.isBlank()) {
-            throw new RuntimeException("customerId must not be null or empty");
-        }
-
         AccountBalanceQuery query = new AccountBalanceQuery();
         query.setCustomerId(Long.valueOf(customerId));
         return ResponseEntity.ok(walletService.accountBalance(query));
     }
 
-    @PostMapping(path = "/transactions")
-    public ResponseEntity<?> transactionList(@RequestParam("customerId") String customerId) {
-        TransactionQuery query = new TransactionQuery();
-        query.setCustomerId(Long.valueOf(customerId));
-        return ResponseEntity.ok(walletService.listTransactions(query));
+    @GetMapping(path = "/transactions")
+    public ResponseEntity<?> transactionList(@ModelAttribute TransactionQuery query,  Pageable pageable) {
+        return ResponseEntity.ok(walletService.listTransactions(query, pageable));
     }
 }
